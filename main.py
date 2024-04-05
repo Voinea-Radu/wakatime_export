@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 
+"""
+You must create a file named `credentials.py` in the same directory as this file.
+The file must contain the following variables:
+
+WAKATIME_API_KEY: str = "REDACTED"
+CLOCKIFY_API_KEY: str = "REDACTED"
+"""
+
 import requests
 from datetime import datetime, UTC
 import re
