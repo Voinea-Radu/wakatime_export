@@ -14,14 +14,14 @@ import re
 from credentials import WAKATIME_API_KEY, CLOCKIFY_API_KEY
 
 
-def regex_str(text: str):
-    return f"^{text}&"
+def str_regex(text: str):
+    return f"^{text}$"
 
 
 DATE = "2024-04-04"
 EXCLUDE_LIST = [
     ".*lab.*", ".*tema.*", ".*teme.*", ".*iocla.*",  # REGEX
-    regex_str("copilot"), regex_str("didi"), regex_str("device"),  # STRINGS
+    str_regex("copilot"), str_regex("didi"), str_regex("device"),  # STRINGS
 ]
 
 WAKATIME_BASE_URL: str = "https://wakatime.com/api/v1"
@@ -58,7 +58,14 @@ def get_wakatime_data():
 
         output.append(project)
 
-    return output
+    projects: dict[str, int] = {}
+
+    for project in output:
+        if project["project"] not in projects:
+            projects[project["project"]] = 0
+        projects[project["project"]] += project["duration"]
+
+    return projects
 
 
 def get_clockify_workspace_id(workspace_name: str):
@@ -102,6 +109,16 @@ def get_clockify_task_id(workspace_id: str, project_id: str, task_name: str):
         if task["name"] == task_name:
             return task["id"]
 
+def time_to_string(time: int):
+    hours = int(time // 3600)
+    minutes = int((time % 3600) // 60)
+    seconds = int(time % 60)
+
+    hours_str = str(hours) if hours >= 10 else f"0{hours}"
+    minutes_str = str(minutes) if minutes >= 10 else f"0{minutes}"
+    seconds_str = str(seconds) if seconds >= 10 else f"0{seconds}"
+
+    return f"{hours_str}:{minutes_str}:{seconds_str}"
 
 def upload_data():
     workspace_id = get_clockify_workspace_id(CLOCKIFY_WORKSPACE_NAME)
@@ -111,12 +128,18 @@ def upload_data():
     wakatime_data = get_wakatime_data()
 
     total_count: int = len(wakatime_data)
+    data_index: int = 0
 
-    for data_index in range(len(wakatime_data)):
-        data = wakatime_data[data_index]
-        start_time = unix_to_iso8601(data["time"])
-        end_time = unix_to_iso8601(data["time"] + data["duration"])
-        project = data["project"]
+    for project, time in wakatime_data.items():
+        data_index += 1
+        # data = wakatime_data[data_index]
+        # start_time = unix_to_iso8601(data["time"])
+        # end_time = unix_to_iso8601(data["time"] + data["duration"])
+        # project = data["project"]
+
+        start_time = f"{DATE}T00:00:00Z"
+        delta =time_to_string(time)
+        end_time = f"{DATE}T{delta}Z"
 
         print(f"{data_index}/{total_count}...", end=" ")
 
