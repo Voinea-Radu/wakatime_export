@@ -18,10 +18,18 @@ def str_regex(text: str):
     return f"^{text}$"
 
 
-DATE = "2024-04-04"
+DATES = [
+    "2024-04-22",
+    "2024-04-23",
+    "2024-04-24",
+    "2024-04-25",
+    "2024-04-26",
+    "2024-04-27",
+    "2024-04-28",
+]
 EXCLUDE_LIST = [
-    ".*lab.*", ".*tema.*", ".*teme.*", ".*iocla.*",  # REGEX
-    str_regex("copilot"), str_regex("didi"), str_regex("device"),  # STRINGS
+    ".*lab.*", ".*tema.*", ".*teme.*", ".*iocla.*", # REGEX
+    str_regex("copilot"), str_regex("didi"), str_regex("device"), str_regex("Unknown Project"), str_regex("partial")  # STRINGS
 ]
 
 WAKATIME_BASE_URL: str = "https://wakatime.com/api/v1"
@@ -38,8 +46,8 @@ def unix_to_iso8601(unix_time):
     return delta_time.strftime('%Y-%m-%dT%H:%M:%S.00Z')
 
 
-def get_wakatime_data():
-    response = requests.get(url=f"{WAKATIME_BASE_URL}/users/current/durations?date={DATE}&api_key={WAKATIME_API_KEY}")
+def get_wakatime_data(date: str):
+    response = requests.get(url=f"{WAKATIME_BASE_URL}/users/current/durations?date={date}&api_key={WAKATIME_API_KEY}")
 
     json = response.json()["data"]
 
@@ -49,7 +57,7 @@ def get_wakatime_data():
         found: bool = False
 
         for exclude in EXCLUDE_LIST:
-            if re.match(exclude, project["project"]) is not None:
+            if re.match(exclude, project["project"], flags=re.IGNORECASE) is not None:
                 found = True
                 break
 
@@ -109,6 +117,7 @@ def get_clockify_task_id(workspace_id: str, project_id: str, task_name: str):
         if task["name"] == task_name:
             return task["id"]
 
+
 def time_to_string(time: int):
     hours = int(time // 3600)
     minutes = int((time % 3600) // 60)
@@ -120,47 +129,48 @@ def time_to_string(time: int):
 
     return f"{hours_str}:{minutes_str}:{seconds_str}"
 
+
 def upload_data():
     workspace_id = get_clockify_workspace_id(CLOCKIFY_WORKSPACE_NAME)
     project_id = get_clockify_project_id(workspace_id, CLOCKIFY_PROJECT_NAME)
     task_id = get_clockify_task_id(workspace_id, project_id, CLOCKIFY_TASK_NAME)
 
-    wakatime_data = get_wakatime_data()
+    date_index: int = 0
 
-    total_count: int = len(wakatime_data)
-    data_index: int = 0
+    for date in DATES:
+        date_index += 1
+        wakatime_data = get_wakatime_data(date)
 
-    for project, time in wakatime_data.items():
-        data_index += 1
-        # data = wakatime_data[data_index]
-        # start_time = unix_to_iso8601(data["time"])
-        # end_time = unix_to_iso8601(data["time"] + data["duration"])
-        # project = data["project"]
+        total_count: int = len(wakatime_data)
+        data_index: int = 0
 
-        start_time = f"{DATE}T00:00:00Z"
-        delta =time_to_string(time)
-        end_time = f"{DATE}T{delta}Z"
+        for project, time in wakatime_data.items():
+            data_index += 1
 
-        print(f"{data_index}/{total_count}...", end=" ")
+            start_time = f"{date}T00:00:00Z"
+            delta = time_to_string(time)
+            end_time = f"{date}T{delta}Z"
 
-        response = requests.post(url=f"{CLOCKIFY_BASE_URL}/workspaces/{workspace_id}/time-entries",
-                                 headers={
-                                     "X-Api-Key": CLOCKIFY_API_KEY
-                                 },
-                                 json={
-                                     "billable": True,
-                                     "description": project,
-                                     "start": start_time,
-                                     "end": end_time,
-                                     "projectId": project_id,
-                                     "taskId": task_id
-                                 }
-                                 )
+            print(f"{date_index}/{len(DATES)} {data_index}/{total_count}...", end=" ")
 
-        print(response.status_code)
+            response = requests.post(url=f"{CLOCKIFY_BASE_URL}/workspaces/{workspace_id}/time-entries",
+                                     headers={
+                                         "X-Api-Key": CLOCKIFY_API_KEY
+                                     },
+                                     json={
+                                         "billable": True,
+                                         "description": project,
+                                         "start": start_time,
+                                         "end": end_time,
+                                         "projectId": project_id,
+                                         "taskId": task_id
+                                     }
+                                     )
 
-        if response.status_code != 201:
-            print(response.json())
+            print(response.status_code)
+
+            if response.status_code != 201:
+                print(response.json())
 
 
 def main():
