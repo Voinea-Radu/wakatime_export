@@ -19,17 +19,17 @@ def str_regex(text: str):
 
 
 DATES = [
-    "2024-04-22",
-    "2024-04-23",
-    "2024-04-24",
-    "2024-04-25",
-    "2024-04-26",
-    "2024-04-27",
-    "2024-04-28",
+    "2024-05-13",
+    "2024-05-14",
+    "2024-05-15",
+    "2024-05-16",
+    "2024-05-17",
+    "2024-05-18",
+    "2024-05-19",
 ]
 EXCLUDE_LIST = [
-    ".*lab.*", ".*tema.*", ".*teme.*", ".*iocla.*", # REGEX
-    str_regex("copilot"), str_regex("didi"), str_regex("device"), str_regex("Unknown Project"), str_regex("partial")  # STRINGS
+    ".*lab.*", ".*tema.*", ".*teme.*", ".*iocla.*", "proiect.*", # REGEX
+    str_regex("copilot"), str_regex("didi"), str_regex("device"), str_regex("Unknown Project"), str_regex("partial"), # STRINGS
 ]
 
 WAKATIME_BASE_URL: str = "https://wakatime.com/api/v1"
