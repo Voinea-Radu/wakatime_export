@@ -9,23 +9,24 @@ CLOCKIFY_API_KEY: str = "REDACTED"
 """
 
 import requests
-from datetime import datetime, UTC
+from datetime import datetime
 import re
-from credentials import WAKATIME_API_KEY, CLOCKIFY_API_KEY
+import pytz
 
+from credentials import WAKATIME_API_KEY, CLOCKIFY_API_KEY
 
 def str_regex(text: str):
     return f"^{text}$"
 
 
 DATES = [
-    "2024-05-13",
-    "2024-05-14",
-    "2024-05-15",
-    "2024-05-16",
-    "2024-05-17",
-    "2024-05-18",
-    "2024-05-19",
+    "2024-07-15",
+    "2024-07-16",
+    "2024-07-17",
+    "2024-07-18",
+    "2024-07-19",
+    "2024-07-20",
+    "2024-07-21",
 ]
 EXCLUDE_LIST = [
     ".*lab.*", ".*tema.*", ".*teme.*", ".*iocla.*", "proiect.*", # REGEX
@@ -42,7 +43,7 @@ CLOCKIFY_TASK_NAME = "Light"
 
 
 def unix_to_iso8601(unix_time):
-    delta_time = datetime.fromtimestamp(unix_time, UTC)
+    delta_time = datetime.fromtimestamp(unix_time, pytz.timezone('UTC'))
     return delta_time.strftime('%Y-%m-%dT%H:%M:%S.00Z')
 
 
