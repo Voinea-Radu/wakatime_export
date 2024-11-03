@@ -15,22 +15,26 @@ import pytz
 
 from credentials import WAKATIME_API_KEY, CLOCKIFY_API_KEY
 
+
 def str_regex(text: str):
     return f"^{text}$"
 
 
 DATES = [
-    "2024-07-15",
-    "2024-07-16",
-    "2024-07-17",
-    "2024-07-18",
-    "2024-07-19",
-    "2024-07-20",
-    "2024-07-21",
+    "2024-10-28",
+    "2024-10-29",
+    "2024-10-30",
+    "2024-10-31",
+    "2024-11-01",
+    "2024-11-02",
+    "2024-11-03",
 ]
 EXCLUDE_LIST = [
-    ".*lab.*", ".*tema.*", ".*teme.*", ".*iocla.*", "proiect.*", # REGEX
-    str_regex("copilot"), str_regex("didi"), str_regex("device"), str_regex("Unknown Project"), str_regex("partial"), # STRINGS
+    # REGEX
+    ".*lab.*", ".*tema.*", ".*teme.*", ".*iocla.*", "proiect.*", ".*bootloader.*", ".*assignment.*",
+    # STRINGS
+    str_regex("copilot"), str_regex("didi"), str_regex("device"), str_regex("Unknown Project"), str_regex("partial"),
+    str_regex("rust_os"), str_regex("fizica"), str_regex("Physics"), str_regex("RustOS")
 ]
 
 WAKATIME_BASE_URL: str = "https://wakatime.com/api/v1"
